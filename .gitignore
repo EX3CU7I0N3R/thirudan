@@ -22,3 +22,9 @@ build/
 *.log
 .DS_Store
 Thumbs.db
+
+PUBLISHING.md
+SECURITY_REVIEW.md
+VALIDATION.md
+
+.gitignore
