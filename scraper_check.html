@@ -3,174 +3,677 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Thirudan Scraper Check</title>
+  <title>Thirudan Console</title>
   <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b0d10;
+      --surface: #12161b;
+      --surface-raised: #171d24;
+      --surface-soft: #1d242d;
+      --border: #2a3340;
+      --border-strong: #405064;
+      --text: #edf2f7;
+      --muted: #a0adbb;
+      --faint: #667586;
+      --accent: #6ee7b7;
+      --accent-strong: #34d399;
+      --blue: #7dd3fc;
+      --amber: #fbbf24;
+      --red: #fb7185;
+      --shadow: 0 24px 80px rgba(0, 0, 0, .32);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-width: 320px;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      margin: 24px;
-      max-width: 980px;
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(135deg, rgba(125, 211, 252, .08), transparent 34%),
+        linear-gradient(315deg, rgba(251, 191, 36, .06), transparent 30%),
+        var(--bg);
+      color: var(--text);
+      font: 14px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
-    label {
-      display: block;
-      margin: 12px 0 4px;
-    }
-
+    button,
     input,
-    textarea,
-    button {
+    textarea {
       font: inherit;
     }
 
+    button {
+      border: 0;
+    }
+
+    .shell {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 40px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .brand {
+      min-width: 0;
+    }
+
+    .eyebrow {
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 2px 0 0;
+      font-size: clamp(26px, 4vw, 42px);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      min-height: 38px;
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: rgba(18, 22, 27, .78);
+      color: var(--muted);
+      white-space: nowrap;
+      box-shadow: var(--shadow);
+    }
+
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--faint);
+    }
+
+    .status-pill.ready .status-dot {
+      background: var(--accent-strong);
+      box-shadow: 0 0 0 4px rgba(52, 211, 153, .14);
+    }
+
+    .status-pill.busy .status-dot {
+      background: var(--amber);
+      box-shadow: 0 0 0 4px rgba(251, 191, 36, .14);
+    }
+
+    .status-pill.error .status-dot {
+      background: var(--red);
+      box-shadow: 0 0 0 4px rgba(251, 113, 133, .14);
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .stack {
+      display: grid;
+      gap: 14px;
+    }
+
+    .card {
+      background: rgba(18, 22, 27, .92);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 48px;
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-title {
+      margin: 0;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .card-body {
+      padding: 14px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field + .field,
+    .two-col {
+      margin-top: 12px;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 10px;
+    }
+
+    label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
     input,
     textarea {
-      box-sizing: border-box;
       width: 100%;
-      padding: 8px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: #0d1116;
+      color: var(--text);
+      outline: 0;
+      transition: border-color .16s ease, box-shadow .16s ease, background .16s ease;
+    }
+
+    input {
+      height: 40px;
+      padding: 0 11px;
     }
 
     textarea {
-      min-height: 92px;
+      min-height: 86px;
+      max-height: 180px;
+      padding: 10px 11px;
+      resize: vertical;
+      font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+      font-size: 12px;
+      line-height: 1.45;
     }
 
-    button {
-      margin: 8px 8px 0 0;
-      padding: 8px 12px;
+    input::placeholder,
+    textarea::placeholder {
+      color: var(--faint);
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: var(--accent-strong);
+      box-shadow: 0 0 0 3px rgba(52, 211, 153, .12);
+      background: #0b1015;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .endpoint-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 9px;
+    }
+
+    .command {
+      display: grid;
+      gap: 4px;
+      min-height: 68px;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      background: var(--surface-raised);
+      color: var(--text);
+      text-align: left;
       cursor: pointer;
+      transition: transform .12s ease, border-color .16s ease, background .16s ease;
+    }
+
+    .command:hover {
+      border-color: var(--border-strong);
+      background: var(--surface-soft);
+      transform: translateY(-1px);
+    }
+
+    .command:disabled,
+    .ghost:disabled {
+      cursor: wait;
+      opacity: .62;
+      transform: none;
+    }
+
+    .method {
+      color: var(--blue);
+      font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .08em;
+    }
+
+    .command-name {
+      overflow-wrap: anywhere;
+      font-weight: 750;
+    }
+
+    .command.login .method {
+      color: var(--amber);
+    }
+
+    .command.logout .method {
+      color: var(--red);
+    }
+
+    .ghost {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 34px;
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface-raised);
+      color: var(--muted);
+      cursor: pointer;
+      transition: border-color .16s ease, background .16s ease, color .16s ease;
+    }
+
+    .ghost:hover {
+      border-color: var(--border-strong);
+      background: var(--surface-soft);
+      color: var(--text);
+    }
+
+    .hint {
+      margin: 10px 0 0;
+      color: var(--faint);
+      font-size: 12px;
+    }
+
+    .console {
+      min-width: 0;
+    }
+
+    .console-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      color: var(--faint);
+      font-size: 12px;
+      font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 3px 8px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--muted);
+      background: #0d1116;
+      white-space: nowrap;
+    }
+
+    .badge.ok {
+      color: var(--accent);
+      border-color: rgba(52, 211, 153, .35);
+    }
+
+    .badge.fail {
+      color: var(--red);
+      border-color: rgba(251, 113, 133, .35);
     }
 
     pre {
-      background: #111;
-      color: #eee;
+      min-height: 500px;
+      max-height: calc(100vh - 260px);
+      margin: 0;
       padding: 16px;
       overflow: auto;
-      min-height: 240px;
+      border-radius: 0 0 8px 8px;
+      background: #080b0f;
+      color: #d7e2ee;
+      font: 12.5px/1.62 "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
       white-space: pre-wrap;
+      overflow-wrap: anywhere;
     }
 
-    .row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
+    .json-key {
+      color: #93c5fd;
+    }
+
+    .json-string {
+      color: #86efac;
+    }
+
+    .json-number,
+    .json-boolean,
+    .json-null {
+      color: #fbbf24;
+    }
+
+    @media (max-width: 880px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      pre {
+        max-height: none;
+        min-height: 360px;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .shell {
+        width: min(100% - 20px, 1180px);
+        padding-top: 16px;
+      }
+
+      .topbar,
+      .card-header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .status-pill {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .endpoint-grid,
+      .two-col {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>Thirudan Scraper Check</h1>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="eyebrow">Thirudan</div>
+        <h1>Scraper Console</h1>
+      </div>
+      <div class="status-pill" id="statusPill">
+        <span class="status-dot"></span>
+        <span id="statusText">Idle</span>
+      </div>
+    </header>
 
-  <label for="baseUrl">API base URL</label>
-  <input id="baseUrl" value="http://localhost:8080">
+    <section class="workspace">
+      <div class="stack">
+        <section class="card">
+          <div class="card-header">
+            <p class="card-title">Connection</p>
+            <button class="ghost" id="probeButton" type="button">Probe</button>
+          </div>
+          <div class="card-body">
+            <div class="field">
+              <label for="baseUrl">API base URL</label>
+              <input id="baseUrl" autocomplete="off" spellcheck="false" value="http://localhost:8080">
+            </div>
+            <p class="hint" id="originHint"></p>
+          </div>
+        </section>
 
-  <div class="row">
-    <div>
-      <label for="account">Account</label>
-      <input id="account" placeholder="RA... or email">
-    </div>
-    <div>
-      <label for="password">Password</label>
-      <input id="password" type="password">
-    </div>
-  </div>
+        <section class="card">
+          <div class="card-header">
+            <p class="card-title">Session</p>
+            <div class="toolbar">
+              <button class="ghost" id="clearSessionButton" type="button">Clear token</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="field">
+              <label for="account">Account</label>
+              <input id="account" autocomplete="username" placeholder="RA... or email">
+            </div>
+            <div class="field">
+              <label for="password">Password</label>
+              <input id="password" autocomplete="current-password" type="password">
+            </div>
+            <div class="two-col">
+              <div class="field">
+                <label for="cdigest">Captcha digest</label>
+                <input id="cdigest" autocomplete="off" spellcheck="false">
+              </div>
+              <div class="field">
+                <label for="captcha">Captcha text</label>
+                <input id="captcha" autocomplete="off" spellcheck="false">
+              </div>
+            </div>
+            <div class="field">
+              <label for="csrfToken">X-CSRF-Token / session cookie</label>
+              <textarea id="csrfToken" spellcheck="false" placeholder="Login fills this automatically, or paste an active SRM session cookie"></textarea>
+            </div>
+          </div>
+        </section>
+      </div>
 
-  <div class="row">
-    <div>
-      <label for="cdigest">Captcha digest</label>
-      <input id="cdigest">
-    </div>
-    <div>
-      <label for="captcha">Captcha text</label>
-      <input id="captcha">
-    </div>
-  </div>
+      <div class="stack console">
+        <section class="card">
+          <div class="card-header">
+            <p class="card-title">Endpoints</p>
+            <div class="toolbar">
+              <button class="ghost" id="copyButton" type="button">Copy response</button>
+              <button class="ghost" id="clearOutputButton" type="button">Clear</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="endpoint-grid" id="endpointGrid"></div>
+          </div>
+        </section>
 
-  <label for="csrfToken">X-CSRF-Token / session cookie</label>
-  <textarea id="csrfToken" placeholder="Login fills this automatically, or paste an existing cookie string"></textarea>
-
-  <div>
-    <button data-action="hello">Hello</button>
-    <button data-action="login">Login</button>
-    <button data-action="attendance">Attendance</button>
-    <button data-action="marks">Marks</button>
-    <button data-action="courses">Courses</button>
-    <button data-action="user">User</button>
-    <button data-action="calendar">Calendar</button>
-    <button data-action="timetable">Timetable</button>
-    <button data-action="get">Get All</button>
-    <button data-action="logout">Logout</button>
-    <button data-action="clear">Clear</button>
-  </div>
-
-  <h2>Response</h2>
-  <pre id="output">Ready.</pre>
+        <section class="card">
+          <div class="card-header">
+            <p class="card-title">Response</p>
+            <div class="console-meta">
+              <span class="badge" id="lastMethod">READY</span>
+              <span class="badge" id="lastStatus">No request</span>
+            </div>
+          </div>
+          <pre id="output">Ready.</pre>
+        </section>
+      </div>
+    </section>
+  </main>
 
   <script>
-    const output = document.querySelector("#output");
-    const baseUrl = document.querySelector("#baseUrl");
-    const csrfToken = document.querySelector("#csrfToken");
+    const endpoints = [
+      { name: "Hello", method: "GET", path: "/hello" },
+      { name: "Login", method: "POST", path: "/login", action: "login", className: "login" },
+      { name: "Attendance", method: "GET", path: "/attendance", protectedRoute: true },
+      { name: "Marks", method: "GET", path: "/marks", protectedRoute: true },
+      { name: "Courses", method: "GET", path: "/courses", protectedRoute: true },
+      { name: "User", method: "GET", path: "/user", protectedRoute: true },
+      { name: "Calendar", method: "GET", path: "/calendar", protectedRoute: true },
+      { name: "Timetable", method: "GET", path: "/timetable", protectedRoute: true },
+      { name: "Get All", method: "GET", path: "/get", protectedRoute: true },
+      { name: "Logout", method: "DELETE", path: "/logout", protectedRoute: true, action: "logout", className: "logout" }
+    ];
 
-    const savedToken = sessionStorage.getItem("thirudan.csrfToken");
-    if (savedToken) csrfToken.value = savedToken;
+    const els = {
+      account: document.querySelector("#account"),
+      baseUrl: document.querySelector("#baseUrl"),
+      captcha: document.querySelector("#captcha"),
+      cdigest: document.querySelector("#cdigest"),
+      clearOutputButton: document.querySelector("#clearOutputButton"),
+      clearSessionButton: document.querySelector("#clearSessionButton"),
+      copyButton: document.querySelector("#copyButton"),
+      csrfToken: document.querySelector("#csrfToken"),
+      endpointGrid: document.querySelector("#endpointGrid"),
+      lastMethod: document.querySelector("#lastMethod"),
+      lastStatus: document.querySelector("#lastStatus"),
+      originHint: document.querySelector("#originHint"),
+      output: document.querySelector("#output"),
+      password: document.querySelector("#password"),
+      probeButton: document.querySelector("#probeButton"),
+      statusPill: document.querySelector("#statusPill"),
+      statusText: document.querySelector("#statusText")
+    };
 
-    document.addEventListener("click", async (event) => {
-      const action = event.target.dataset.action;
-      if (!action) return;
+    let activeRequest = null;
+
+    hydrate();
+    renderEndpoints();
+    updateOriginHint();
+
+    els.baseUrl.addEventListener("change", persistBaseUrl);
+    els.baseUrl.addEventListener("blur", persistBaseUrl);
+    els.csrfToken.addEventListener("input", persistToken);
+    els.probeButton.addEventListener("click", () => requestEndpoint(endpoints[0]));
+    els.clearOutputButton.addEventListener("click", clearOutput);
+    els.clearSessionButton.addEventListener("click", clearSession);
+    els.copyButton.addEventListener("click", copyResponse);
+
+    function hydrate() {
+      const savedBaseUrl = sessionStorage.getItem("thirudan.baseUrl");
+      const savedToken = sessionStorage.getItem("thirudan.csrfToken");
+
+      if (savedBaseUrl) {
+        els.baseUrl.value = savedBaseUrl;
+      }
+
+      if (savedToken) {
+        els.csrfToken.value = savedToken;
+        setStatus("ready", "Session restored");
+      }
+    }
+
+    function renderEndpoints() {
+      els.endpointGrid.textContent = "";
+
+      for (const endpoint of endpoints) {
+        const button = document.createElement("button");
+        button.className = `command ${endpoint.className || ""}`.trim();
+        button.type = "button";
+        button.innerHTML = [
+          `<span class="method">${endpoint.method}</span>`,
+          `<span class="command-name">${endpoint.name}</span>`
+        ].join("");
+        button.addEventListener("click", () => requestEndpoint(endpoint));
+        els.endpointGrid.append(button);
+      }
+    }
+
+    async function requestEndpoint(endpoint) {
+      if (activeRequest) {
+        activeRequest.abort();
+      }
 
       try {
-        if (action === "clear") {
-          output.textContent = "Ready.";
-          return;
+        setBusy(true, endpoint);
+
+        if (endpoint.protectedRoute && !els.csrfToken.value.trim()) {
+          throw new Error("This endpoint needs an active X-CSRF-Token / session cookie.");
         }
 
-        if (action === "hello") {
-          await callApi("/hello");
-          return;
-        }
-
-        if (action === "login") {
+        if (endpoint.action === "login") {
           await login();
           return;
         }
 
-        if (action === "logout") {
-          await callApi("/logout", { method: "DELETE", protectedRoute: true });
-          return;
-        }
+        const payload = await callApi(endpoint.path, {
+          method: endpoint.method,
+          protectedRoute: endpoint.protectedRoute
+        });
 
-        await callApi(`/${action}`, { protectedRoute: true });
+        if (endpoint.action === "logout") {
+          clearSession();
+          setStatus("idle", "Logged out");
+        } else if (payload && payload.tokenInvalid) {
+          setStatus("error", "Session expired");
+        } else {
+          setStatus("ready", endpoint.path === "/hello" ? "API reachable" : "Request complete");
+        }
       } catch (error) {
-        output.textContent = String(error.stack || error);
+        if (error.name !== "AbortError") {
+          renderError(error);
+          setStatus("error", "Request failed");
+        }
+      } finally {
+        setBusy(false);
       }
-    });
+    }
 
     async function login() {
-      const body = {
-        account: valueOf("#account"),
-        password: valueOf("#password")
-      };
+      const account = valueOf(els.account);
+      const password = valueOf(els.password);
 
-      const cdigest = valueOf("#cdigest");
-      const captcha = valueOf("#captcha");
-      if (cdigest) body.cdigest = cdigest;
-      if (captcha) body.captcha = captcha;
+      if (!account || !password) {
+        throw new Error("Account and password are required for login.");
+      }
 
-      const response = await callApi("/login", {
+      const body = { account, password };
+      const cdigest = valueOf(els.cdigest);
+      const captcha = valueOf(els.captcha);
+
+      if (cdigest) {
+        body.cdigest = cdigest;
+      }
+
+      if (captcha) {
+        body.captcha = captcha;
+      }
+
+      const payload = await callApi("/login", {
         method: "POST",
         body,
         returnJson: true
       });
 
-      if (response.cookies) {
-        csrfToken.value = response.cookies;
-        sessionStorage.setItem("thirudan.csrfToken", response.cookies);
+      if (payload && payload.cookies) {
+        els.csrfToken.value = payload.cookies;
+        persistToken();
+        setStatus("ready", "Authenticated");
+        return;
       }
+
+      if (payload && payload.captcha) {
+        setStatus("idle", "Captcha required");
+        return;
+      }
+
+      setStatus("idle", "Login response received");
     }
 
     async function callApi(path, options = {}) {
+      const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), 45000);
+      activeRequest = controller;
+
       const headers = { Accept: "application/json" };
-      const request = { method: options.method || "GET", headers };
+      const request = {
+        method: options.method || "GET",
+        headers,
+        signal: controller.signal
+      };
 
       if (options.protectedRoute) {
-        headers["X-CSRF-Token"] = csrfToken.value.trim();
+        headers["X-CSRF-Token"] = els.csrfToken.value.trim();
       }
 
       if (options.body) {
@@ -178,45 +681,193 @@
         request.body = JSON.stringify(options.body);
       }
 
-      const url = `${baseUrl.value.replace(/\/$/, "")}${path}`;
-      output.textContent = `Loading ${url}...`;
-      let response;
+      const url = `${normalizedBaseUrl()}${path}`;
+      renderLoading(url, request.method);
+
       try {
-        response = await fetch(url, request);
+        const response = await fetch(url, request);
+        const responseText = await response.text();
+        const payload = parseJson(responseText);
+
+        renderResponse({
+          method: request.method,
+          path,
+          status: response.status,
+          ok: response.ok,
+          body: payload
+        });
+
+        return payload;
       } catch (error) {
-        throw new Error([
-          `Could not reach ${url}.`,
-          "",
-          "Check that the API is running:",
-          ".\\venv\\Scripts\\python.exe main.py",
-          "",
-          "If it is running, refresh this HTML file so the latest CORS settings apply.",
-          "",
-          `Browser error: ${error.message}`
-        ].join("\n"));
+        if (error.name === "AbortError") {
+          throw new Error(`Request timed out while calling ${url}.`);
+        }
+
+        throw new Error(connectionMessage(url, error));
+      } finally {
+        window.clearTimeout(timeout);
+        if (activeRequest === controller) {
+          activeRequest = null;
+        }
       }
-      const text = await response.text();
-      const payload = parseJson(text);
-
-      output.textContent = JSON.stringify({
-        status: response.status,
-        ok: response.ok,
-        body: payload
-      }, null, 2);
-
-      return options.returnJson ? payload : undefined;
     }
 
-    function valueOf(selector) {
-      return document.querySelector(selector).value.trim();
+    function normalizedBaseUrl() {
+      const rawUrl = els.baseUrl.value.trim() || "http://localhost:8080";
+      return rawUrl.replace(/\/+$/, "");
+    }
+
+    function connectionMessage(url, error) {
+      const fileMode = window.location.protocol === "file:";
+      const lines = [
+        `Could not read ${url}.`,
+        "",
+        "The API may be stopped, restarting, or blocked by browser CORS."
+      ];
+
+      if (fileMode) {
+        lines.push(
+          "",
+          "This page is open through file://.",
+          "Either restart the API with ALLOW_FILE_ORIGIN=true in .env, or serve this folder with:",
+          "python -m http.server 8081",
+          "",
+          "Then open:",
+          "http://localhost:8081/scraper_check.html"
+        );
+      }
+
+      lines.push("", `Browser error: ${error.message}`);
+      return lines.join("\n");
+    }
+
+    function renderLoading(url, method) {
+      els.lastMethod.textContent = method;
+      els.lastStatus.textContent = "Loading";
+      els.lastStatus.className = "badge";
+      els.output.textContent = `Calling ${url}...`;
+    }
+
+    function renderResponse(response) {
+      els.lastMethod.textContent = response.method;
+      els.lastStatus.textContent = String(response.status);
+      els.lastStatus.className = `badge ${response.ok ? "ok" : "fail"}`;
+      els.output.innerHTML = highlightJson(JSON.stringify(response, null, 2));
+    }
+
+    function renderError(error) {
+      els.lastMethod.textContent = "ERROR";
+      els.lastStatus.textContent = "Failed";
+      els.lastStatus.className = "badge fail";
+      els.output.textContent = error.message || String(error);
+    }
+
+    function clearOutput() {
+      els.lastMethod.textContent = "READY";
+      els.lastStatus.textContent = "No request";
+      els.lastStatus.className = "badge";
+      els.output.textContent = "Ready.";
+    }
+
+    function clearSession() {
+      els.csrfToken.value = "";
+      sessionStorage.removeItem("thirudan.csrfToken");
+    }
+
+    async function copyResponse() {
+      const text = els.output.textContent;
+
+      if (!text.trim()) {
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(text);
+        setStatus("ready", "Response copied");
+      } catch {
+        setStatus("error", "Copy unavailable");
+      }
+    }
+
+    function setBusy(isBusy, endpoint) {
+      document.querySelectorAll("button").forEach((button) => {
+        button.disabled = isBusy;
+      });
+
+      if (isBusy) {
+        setStatus("busy", endpoint ? `Calling ${endpoint.name}` : "Calling API");
+      }
+    }
+
+    function setStatus(kind, text) {
+      els.statusPill.className = `status-pill ${kind}`;
+      els.statusText.textContent = text;
+    }
+
+    function persistBaseUrl() {
+      els.baseUrl.value = normalizedBaseUrl();
+      sessionStorage.setItem("thirudan.baseUrl", els.baseUrl.value);
+    }
+
+    function persistToken() {
+      const token = els.csrfToken.value.trim();
+
+      if (token) {
+        sessionStorage.setItem("thirudan.csrfToken", token);
+      } else {
+        sessionStorage.removeItem("thirudan.csrfToken");
+      }
+    }
+
+    function updateOriginHint() {
+      if (window.location.protocol === "file:") {
+        els.originHint.textContent = "file:// mode needs ALLOW_FILE_ORIGIN=true, or serve this folder over localhost.";
+        return;
+      }
+
+      els.originHint.textContent = `Origin: ${window.location.origin}`;
+    }
+
+    function valueOf(input) {
+      return input.value.trim();
     }
 
     function parseJson(text) {
+      if (!text) {
+        return null;
+      }
+
       try {
         return JSON.parse(text);
       } catch {
         return text;
       }
+    }
+
+    function highlightJson(json) {
+      return escapeHtml(json).replace(
+        /("(?:\\u[a-fA-F0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\btrue\b|\bfalse\b|\bnull\b|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)/g,
+        (match) => {
+          let className = "json-number";
+
+          if (/^"/.test(match)) {
+            className = /:$/.test(match) ? "json-key" : "json-string";
+          } else if (/true|false/.test(match)) {
+            className = "json-boolean";
+          } else if (/null/.test(match)) {
+            className = "json-null";
+          }
+
+          return `<span class="${className}">${match}</span>`;
+        }
+      );
+    }
+
+    function escapeHtml(value) {
+      return value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
     }
   </script>
 </body>
