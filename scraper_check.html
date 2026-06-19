@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Thirudan Scraper Check</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 24px;
+      max-width: 980px;
+    }
+
+    label {
+      display: block;
+      margin: 12px 0 4px;
+    }
+
+    input,
+    textarea,
+    button {
+      font: inherit;
+    }
+
+    input,
+    textarea {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 8px;
+    }
+
+    textarea {
+      min-height: 92px;
+    }
+
+    button {
+      margin: 8px 8px 0 0;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
+
+    pre {
+      background: #111;
+      color: #eee;
+      padding: 16px;
+      overflow: auto;
+      min-height: 240px;
+      white-space: pre-wrap;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Thirudan Scraper Check</h1>
+
+  <label for="baseUrl">API base URL</label>
+  <input id="baseUrl" value="http://localhost:8080">
+
+  <div class="row">
+    <div>
+      <label for="account">Account</label>
+      <input id="account" placeholder="RA... or email">
+    </div>
+    <div>
+      <label for="password">Password</label>
+      <input id="password" type="password">
+    </div>
+  </div>
+
+  <div class="row">
+    <div>
+      <label for="cdigest">Captcha digest</label>
+      <input id="cdigest">
+    </div>
+    <div>
+      <label for="captcha">Captcha text</label>
+      <input id="captcha">
+    </div>
+  </div>
+
+  <label for="csrfToken">X-CSRF-Token / session cookie</label>
+  <textarea id="csrfToken" placeholder="Login fills this automatically, or paste an existing cookie string"></textarea>
+
+  <div>
+    <button data-action="hello">Hello</button>
+    <button data-action="login">Login</button>
+    <button data-action="attendance">Attendance</button>
+    <button data-action="marks">Marks</button>
+    <button data-action="courses">Courses</button>
+    <button data-action="user">User</button>
+    <button data-action="calendar">Calendar</button>
+    <button data-action="timetable">Timetable</button>
+    <button data-action="get">Get All</button>
+    <button data-action="logout">Logout</button>
+    <button data-action="clear">Clear</button>
+  </div>
+
+  <h2>Response</h2>
+  <pre id="output">Ready.</pre>
+
+  <script>
+    const output = document.querySelector("#output");
+    const baseUrl = document.querySelector("#baseUrl");
+    const csrfToken = document.querySelector("#csrfToken");
+
+    const savedToken = sessionStorage.getItem("thirudan.csrfToken");
+    if (savedToken) csrfToken.value = savedToken;
+
+    document.addEventListener("click", async (event) => {
+      const action = event.target.dataset.action;
+      if (!action) return;
+
+      try {
+        if (action === "clear") {
+          output.textContent = "Ready.";
+          return;
+        }
+
+        if (action === "hello") {
+          await callApi("/hello");
+          return;
+        }
+
+        if (action === "login") {
+          await login();
+          return;
+        }
+
+        if (action === "logout") {
+          await callApi("/logout", { method: "DELETE", protectedRoute: true });
+          return;
+        }
+
+        await callApi(`/${action}`, { protectedRoute: true });
+      } catch (error) {
+        output.textContent = String(error.stack || error);
+      }
+    });
+
+    async function login() {
+      const body = {
+        account: valueOf("#account"),
+        password: valueOf("#password")
+      };
+
+      const cdigest = valueOf("#cdigest");
+      const captcha = valueOf("#captcha");
+      if (cdigest) body.cdigest = cdigest;
+      if (captcha) body.captcha = captcha;
+
+      const response = await callApi("/login", {
+        method: "POST",
+        body,
+        returnJson: true
+      });
+
+      if (response.cookies) {
+        csrfToken.value = response.cookies;
+        sessionStorage.setItem("thirudan.csrfToken", response.cookies);
+      }
+    }
+
+    async function callApi(path, options = {}) {
+      const headers = { Accept: "application/json" };
+      const request = { method: options.method || "GET", headers };
+
+      if (options.protectedRoute) {
+        headers["X-CSRF-Token"] = csrfToken.value.trim();
+      }
+
+      if (options.body) {
+        headers["Content-Type"] = "application/json";
+        request.body = JSON.stringify(options.body);
+      }
+
+      const url = `${baseUrl.value.replace(/\/$/, "")}${path}`;
+      output.textContent = `Loading ${url}...`;
+      let response;
+      try {
+        response = await fetch(url, request);
+      } catch (error) {
+        throw new Error([
+          `Could not reach ${url}.`,
+          "",
+          "Check that the API is running:",
+          ".\\venv\\Scripts\\python.exe main.py",
+          "",
+          "If it is running, refresh this HTML file so the latest CORS settings apply.",
+          "",
+          `Browser error: ${error.message}`
+        ].join("\n"));
+      }
+      const text = await response.text();
+      const payload = parseJson(text);
+
+      output.textContent = JSON.stringify({
+        status: response.status,
+        ok: response.ok,
+        body: payload
+      }, null, 2);
+
+      return options.returnJson ? payload : undefined;
+    }
+
+    function valueOf(selector) {
+      return document.querySelector(selector).value.trim();
+    }
+
+    function parseJson(text) {
+      try {
+        return JSON.parse(text);
+      } catch {
+        return text;
+      }
+    }
+  </script>
+</body>
+</html>
