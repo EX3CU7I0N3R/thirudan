@@ -24,13 +24,6 @@ Copy-Item .env.example .env
 
 The server listens on `PORT` or defaults to `8080`.
 
-## Screenshots
-
-The following previews show the two main entry points in the project: the API surface and the browser-based tester.
-
-![Thirudan scraper check tester](docs/screenshots/image.png)
-
-![Thirudan terminal log](docs/screenshots/image1.png)
 
 ## What You Get
 
@@ -166,6 +159,15 @@ Local checks used during the latest refactor:
 .\venv\Scripts\python.exe -c "from web.api import app; print(app.title)"
 .\venv\Scripts\python.exe -c "from web.api import app; from fastapi.testclient import TestClient; c=TestClient(app); print(c.get('/hello').json())"
 ```
+
+## Screenshots
+
+The following previews shows the activity handlers in the project: the API log and the browser-based tester.
+
+![Thirudan scraper check tester](docs/screenshots/image.png)
+
+![Thirudan terminal log](docs/screenshots/image1.png)
+
 
 ## License
 
