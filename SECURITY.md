@@ -7,6 +7,7 @@ Thirudan is intended for local, user-controlled scraping sessions. Do not run a 
 - SRM passwords are sent only to the local API, which forwards them to SRM Academia during login.
 - The `X-CSRF-Token` header contains the active SRM session cookie. Treat it like a password.
 - The browser tester stores the session cookie in `sessionStorage`, so it is cleared when the tab session ends.
+- Supabase persistence requires `SUPABASE_KEY` and `ENCRYPTION_KEY`. Keep both private; changing `ENCRYPTION_KEY` makes previously encrypted cache rows unreadable.
 - `.env` is ignored by Git. Use `.env.example` as the public template.
 
 ## Reporting

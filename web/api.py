@@ -152,13 +152,15 @@ def calendar(
 
     def fetch() -> dict[str, Any]:
         store = _store_or_none()
+        can_persist_calendar = store is not None
         if store:
-            cached_calendar = store.get_calendar()
-            if cached_calendar and cached_calendar.get("calendar"):
-                return cached_calendar
+            with store:
+                cached_calendar = store.get_calendar()
+                if cached_calendar and cached_calendar.get("calendar"):
+                    return cached_calendar
         response = AcademiaScraper(x_csrf_token).calendar().to_dict()
-        if store and response.get("calendar"):
-            executor.submit(store.store_calendar, response["calendar"])
+        if can_persist_calendar and response.get("calendar"):
+            executor.submit(_store_calendar, response["calendar"])
         return response
 
     return _cached("calendar", x_csrf_token, fetch)
@@ -185,26 +187,26 @@ def get_all(
     store = _store_or_none()
 
     if store:
-        cached_data = store.find_by_session_hash(encoded_token)
-        if (
-            cached_data
-            and cached_data.get("timetable") is not None
-            and cached_data.get("attendance") is not None
-            and cached_data.get("marks") is not None
-        ):
-            schedule_note = store.get_schedule_note(encoded_token)
-            if schedule_note:
-                cached_data["scheduleNote"] = schedule_note
-            executor.submit(_refresh_all, x_csrf_token, encoded_token, store)
-            return cached_data
+        with store:
+            cached_data = store.find_by_session_hash(encoded_token)
+            if (
+                cached_data
+                and cached_data.get("timetable") is not None
+                and cached_data.get("attendance") is not None
+                and cached_data.get("marks") is not None
+            ):
+                executor.submit(_refresh_all, x_csrf_token, encoded_token)
+                return cached_data
 
     data = AcademiaScraper(x_csrf_token).all_data()
     data["token"] = encoded_token
+    store = _store_or_none()
     if store:
-        schedule_note = store.get_schedule_note(encoded_token)
+        with store:
+            schedule_note = store.get_schedule_note(encoded_token)
         if schedule_note:
             data["scheduleNote"] = schedule_note
-        executor.submit(store.upsert_snapshot, dict(data))
+        executor.submit(_upsert_snapshot, dict(data))
     return data
 
 
@@ -216,10 +218,20 @@ def _cached(name: str, token: str, factory: Any) -> dict[str, Any]:
     return cache.set(key, factory())
 
 
-def _refresh_all(token: str, encoded_token: str, store: SnapshotStore) -> None:
+def _refresh_all(token: str, encoded_token: str) -> None:
     data = AcademiaScraper(token).all_data()
     data["token"] = encoded_token
-    store.upsert_snapshot(data)
+    _upsert_snapshot(data)
+
+
+def _upsert_snapshot(data: dict[str, Any]) -> None:
+    with SnapshotStore() as store:
+        store.upsert_snapshot(data)
+
+
+def _store_calendar(calendar: list[dict[str, Any]]) -> None:
+    with SnapshotStore() as store:
+        store.store_calendar(calendar)
 
 
 def _store_or_none() -> SnapshotStore | None:

@@ -42,6 +42,15 @@ class SnapshotStore:
         )
         self.key = hashlib.sha256(config.encryption_key.encode()).digest()
 
+    def close(self) -> None:
+        self.client.close()
+
+    def __enter__(self) -> "SnapshotStore":
+        return self
+
+    def __exit__(self, *_: object) -> None:
+        self.close()
+
     def find_by_session_hash(self, session_hash: str) -> dict[str, Any] | None:
         response = self.client.get(
             f"{self.base_url}/rest/v1/{self.scrape_table}",
@@ -60,6 +69,13 @@ class SnapshotStore:
                 row[key] = json.loads(value)
             elif key not in self._plain_columns():
                 row[key] = json.loads(self._decrypt(value))
+        if self.student_key_column in row:
+            row["regNumber"] = row.pop(self.student_key_column)
+        if self.session_key_column in row:
+            row["token"] = row.pop(self.session_key_column)
+        if self.schedule_note_column in row:
+            row["scheduleNote"] = row.pop(self.schedule_note_column) or ""
+        row.pop(self.refreshed_at_column, None)
         return row
 
     def upsert_snapshot(self, payload: dict[str, Any]) -> None:
@@ -132,6 +148,11 @@ class SnapshotStore:
                     }
                 )
         if rows:
+            delete_response = self.client.delete(
+                f"{self.base_url}/rest/v1/{self.calendar_table}",
+                params={"id": "not.is.null"},
+            )
+            delete_response.raise_for_status()
             response = self.client.post(
                 f"{self.base_url}/rest/v1/{self.calendar_table}", json=rows
             )

@@ -1,11 +1,11 @@
 # Thirudan
 
->[!WARNING]
->This is an unofficial scraper for the SRM Institute of Science and Technology Academia portal. It is intended exclusively for educational and personal use. The developers are not affiliated with SRM Institute of Science and Technology and assume no responsibility or liability for any misuse of this software or for any actions taken by its users.
-
-Thirudan is intentionally small and modular. `main.py` is the entrypoint, while the rest of the codebase is split into focused packages for HTTP routes, scraping, shared core logic, and service orchestration.
+> [!WARNING]
+> This is an unofficial scraper for the SRM Institute of Science and Technology Academia portal. It is intended exclusively for educational and personal use. The developers are not affiliated with SRM Institute of Science and Technology and assume no responsibility or liability for any misuse of this software or for any actions taken by its users.
 
 Python 3.11+ service for fetching, normalizing, and exposing SRM Academia data for local use.
+
+Thirudan is intentionally small and modular. `main.py` is the entrypoint, while the rest of the codebase is split into focused packages for HTTP routes, scraping, shared core logic, and service orchestration.
 
 ## Status
 
@@ -50,6 +50,7 @@ The following previews show the two main entry points in the project: the API su
 | `scraper/` | HTTP transport, HTML parsing, timetable derivation, and workflow orchestration. |
 | `core/` | Configuration, constants, markup helpers, rate limiting, cookies, utilities, and shared domain logic. |
 | `core/schemas/` | Response models for academics, calendar, session, and timetable data. |
+| `docs/supabase_schema.sql` | Optional Supabase table setup for persistent cache storage. |
 
 ## API Overview
 
@@ -143,6 +144,8 @@ Configuration lives in `.env`. Start from `.env.example`; do not commit a popula
 | `SESSION_KEY_COLUMN` | Column used for the hashed session key in the aggregate cache table. |
 | `REFRESHED_AT_COLUMN` | Column used for the last refresh timestamp in the aggregate cache table. |
 | `SCHEDULE_NOTE_COLUMN` | Optional column for a schedule or operating-hours note surfaced as `scheduleNote`. |
+
+For a new Supabase project, run [docs/supabase_schema.sql](docs/supabase_schema.sql) in the Supabase SQL editor before enabling persistence. The aggregate cache encrypts user, attendance, marks, and course payloads with `ENCRYPTION_KEY`; timetable and calendar rows are stored as normalized cache data.
 
 ## Scraper Flow
 
